@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:proyectof1/domain/entities/respuesta.dart';
+import 'package:proyectof1/provider/respuesta_provider.dart';
 
 class InventarioPage extends StatefulWidget {
   @override
@@ -6,12 +8,7 @@ class InventarioPage extends StatefulWidget {
 }
 
 class _InventarioPageState extends State<InventarioPage> {
-  List<Producto> productos = [
-    Producto(id: 1, nombre: 'Producto 1', categoria: 'Electrónica', stock: 10, precioVenta: 20.0),
-    Producto(id: 2, nombre: 'Producto 2', categoria: 'Ropa', stock: 15, precioVenta: 30.0),
-  ];
-
-  String categoriaSeleccionada = 'Electrónica';
+  final RespuestaProvider _respuestaProvider = RespuestaProvider();
 
   @override
   Widget build(BuildContext context) {
@@ -24,58 +21,46 @@ class _InventarioPageState extends State<InventarioPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DropdownButton<String>(
-              value: categoriaSeleccionada,
-              onChanged: (String? newValue) {
-                setState(() {
-                  categoriaSeleccionada = newValue!;
-                });
+            FutureBuilder(
+              future: _respuestaProvider.loadRespuesta(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  // Obtiene la lista de inventario desde RespuestaProvider
+                  List<Inventario> productos = _respuestaProvider.inventarioList;
+
+                  return Column(
+                    children: [
+                      SizedBox(height: 20),
+                      Text('Lista de Productos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 10),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: productos.length,
+                          itemBuilder: (context, index) {
+                            final producto = productos[index];
+                            return Card(
+                              child: ListTile(
+                                title: Text(producto.name),
+                                subtitle: Text(
+                                  'ID Producto: ${producto.id} - name: ${producto.name} - Stock: ${producto.stock} - fecha: ${producto.date}',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
               },
-              items: ['Electrónica', 'Ropa', 'Hogar'].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20),
-            Text('Productos en la categoría: $categoriaSeleccionada', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: productos.length,
-                itemBuilder: (context, index) {
-                  final producto = productos[index];
-                  if (producto.categoria == categoriaSeleccionada) {
-                    return ListTile(
-                      title: Text(producto.nombre),
-                      subtitle: Text('ID Producto: ${producto.id} - Stock: ${producto.stock} - Precio Venta: \$${producto.precioVenta.toStringAsFixed(2)}'),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class Producto {
-  final int id;
-  final String nombre;
-  final String categoria;
-  final int stock;
-  final double precioVenta;
-
-  Producto({
-    required this.id,
-    required this.nombre,
-    required this.categoria,
-    required this.stock,
-    required this.precioVenta,
-  });
 }

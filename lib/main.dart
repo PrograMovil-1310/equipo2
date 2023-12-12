@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:proyectof1/inventario.dart';
-import 'package:proyectof1/acerca.dart';
-import 'package:proyectof1/home_screen.dart';
-import 'package:proyectof1/scanner.dart';
-import 'package:proyectof1/editar.dart';
+import 'package:proyectof1/screens/inventario.dart';
+import 'package:proyectof1/screens/acerca.dart';
+import 'package:proyectof1/screens/home_screen.dart';
+import 'package:proyectof1/screens/scanner.dart';
+import 'package:proyectof1/screens/editar.dart';
 
 void main() {
   runApp(MyApp());
